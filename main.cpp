@@ -28,6 +28,7 @@ int main() {
     //auto yState = std::dynamic_pointer_cast<PrimitiveTypeWrapper<int>>(state.getByTag("y"));
 
     if (time) {
+        std::cout << "Time createdAt: " << time->timePointToString(time->getCreationTime()) << std::endl;
         std::cout << "Time Tick: " << time->getTick() << std::endl;
     }
 
