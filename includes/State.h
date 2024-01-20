@@ -6,16 +6,35 @@
 #include <string>
 #include <typeindex>
 #include <chrono>
+#include <sstream>
+#include <iomanip>
 
 class StateManager; // Forward declaration
 
 class State {
 protected:
     StateManager& manager;
+    // Last modification timestamp
 public:
     State(StateManager& m);
     virtual ~State() = default;
     StateManager& getManager();
+
+    [[nodiscard]] std::chrono::time_point<std::chrono::system_clock> getCreationTime() const { return createdAt; }
+    [[nodiscard]] std::chrono::time_point<std::chrono::system_clock> getLastModifiedTime() const { return lastModified; }
+
+    template <typename Clock, typename Duration>
+    std::string timePointToString(const std::chrono::time_point<Clock, Duration>& timePoint) {
+        std::time_t time = Clock::to_time_t(timePoint);
+        std::tm tm = *std::gmtime(&time);  // Use std::localtime if you want local time instead of UTC
+
+        std::stringstream ss;
+        ss << std::put_time(&tm, "%Y-%m-%d %H:%M:%S");
+        return ss.str();
+    }
+
+    std::chrono::time_point<std::chrono::system_clock> createdAt;
+    std::chrono::time_point<std::chrono::system_clock> lastModified;
 };
 
 template<typename T>

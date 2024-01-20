@@ -16,12 +16,14 @@ public:
     template<typename T, typename... Args>
     auto append(const std::string& tag, Args &&... args) {
         std::unique_lock<std::shared_mutex> lock(m);
-
         if constexpr (std::is_base_of<State, T>::value) {
-            auto ptr = std::make_shared<T>(*this, std::forward<Args>(args)...);
-            stateMap[std::type_index(typeid(T))].push_back(ptr);
-            taggedStates[tag] = ptr;
-            return ptr;
+            size_t index = stateMap[std::type_index(typeid(T))].size();
+            auto newState = std::make_shared<T>(*this, std::forward<Args>(args)...);
+            newState->createdAt = std::chrono::system_clock::now();  // Set creation timestamp
+            newState->lastModified = newState->createdAt;  // Set modification timestamp
+            stateMap[std::type_index(typeid(T))].push_back(newState);
+            taggedStates[tag] = newState;
+            return newState;
         } else {
             size_t index = stateMap[std::type_index(typeid(PrimitiveTypeWrapper<T>))].size();
             auto wrapper = std::make_shared<PrimitiveTypeWrapper<T>>(*this, std::forward<Args>(args)..., index);
